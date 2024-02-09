@@ -43,7 +43,7 @@ const themeConfig = {
   docsRepositoryBase: "https://github.com/vercel/swr-site/blob/main",
   useNextSeoProps() {
     return {
-      titleTemplate: "%s – SWR",
+      titleTemplate: "%s – Bilingual",
     };
   },
   toc: {
