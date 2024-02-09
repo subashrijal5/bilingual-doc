@@ -1,8 +1,7 @@
 {
     "index": "はじめに",
-    "about": "紹介",
     "api-and-export":"APIとエクスポート",
-    "get-started": "はじめに",
+    "get-started": "始める",
     "subscription": "サブスクリプション",
     "validate-translated-strings": "翻訳された文字列を検証する",
     "contact": {
