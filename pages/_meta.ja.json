@@ -1,0 +1,14 @@
+{
+    "index": "はじめに",
+    "about": "紹介",
+    "api-and-export":"APIとエクスポート",
+    "get-started": "はじめに",
+    "subscription": "サブスクリプション",
+    "validate-translated-strings": "翻訳された文字列を検証する",
+    "contact": {
+        "title": "お問い合わせ ↗",
+        "type": "ページ",
+        "href": "https://discord.gg/5gSBEUbU",
+        "newWindow": true
+    }
+}
