@@ -4,6 +4,7 @@
     "get-started": "始める",
     "subscription": "サブスクリプション",
     "validate-translated-strings": "翻訳された文字列を検証する",
+    "bilingual-with-nextjs": "Next.jsサイトを簡単に複数言語化する",
     "contact": {
         "title": "お問い合わせ ↗",
         "type": "ページ",

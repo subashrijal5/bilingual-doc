@@ -1,0 +1,252 @@
+
+# Next.jsサイトを簡単に複数言語化する
+
+## はじめに:
+
+[Bilingual](https://bilingual.vuvusha.com)を使って、簡単かつシームレスにWebサイトを翻訳することができます。Deepl Pro、Google Cloud Translation(Pro)、Bilingual(翻訳モデル)などの専門的で高精度な翻訳サービスを利用できます。
+
+Bilingualには、翻訳された文章を確認できる美しいダッシュボードや、さまざまな言語のSDK、任意のフレームワークやプログラミング言語と簡単に統合できるRestAPIが用意されています。
+
+## Bilingualの特徴
+
+Bilingualは、精度チェックを行った専門家レベルの翻訳を提供し、90%以上の翻訳精度を実現しています。さらに開発コストと工数を70%以上削減できるコマンドラインやSDKを提供しています。人間の翻訳者を雇う場合でも、Bilingualにより90%の作業が削減されるため、人間の翻訳者はレビューと承認のみで対応できます。
+
+## 始めましょう
+
+今回は、Next.js(App Router)プロジェクトにBilingualを統合する方法をご紹介します。
+
+まず、Next.jsプロジェクトを作成しましょう。
+
+Next.js 14をインストールするには、ターミナルで以下のコマンドを実行します:
+
+```bash
+npx create-next-app@latest
+```
+
+インストール時には以下のようなプロンプトが表示されます:
+
+```bash
+プロジェクト名は何ですか? my-app
+TypeScriptを使いますか? いいえ / はい
+ESLintを使いますか? いいえ / はい 
+Tailwind CSSを使いますか? いいえ / はい
+src/ディレクトリを使いますか? いいえ / はい
+App Routerを使いますか?(推奨) いいえ / はい
+デフォルトのインポートエイリアス(@/*)をカスタマイズしますか? いいえ / はい
+どのインポートエイリアスを構成しますか? @/*
+```
+
+好みに応じて設定を行ってください。
+
+私の設定は以下の通りです:
+
+![Untitled](/images/Untitled.png)
+
+次に、ディレクトリに移動して、next-intlとbilingual-tsパッケージをインストールしましょう。これらのパッケージにより、簡単に翻訳を統合できます。インストールするには、以下のコマンドを実行します:
+
+```bash
+cd path/to/your-project-directory
+npm install next-intl bilingual-ts
+```
+
+必要なパッケージのインストールが完了しました。
+
+お気に入りのコードエディタで開いてみましょう。私の場合はVS Codeを使っているので、以下のコマンドで開きます:
+
+```bash
+code .
+```
+
+### ミドルウェアと設定
+
+まず、i18n設定(次のステップで指定)をサーバーコンポーネントに提供するためのエイリアスを作成するプラグインを設定します。
+
+[next-intl](https://next-intl-docs.vercel.app/)の公式ドキュメントで詳細を確認できます。
+
+`next.config.mjs`に以下のコードを書きます:
+
+```jsx
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin();
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {};
+
+export default withNextIntl(nextConfig);
+```
+
+commonjsを使用している場合は、`import`文は使えません。以下の設定を使ってください:
+
+```jsx
+const createNextIntlPlugin = require('next-intl/plugin');
+
+const withNextIntl = createNextIntlPlugin();
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {};
+
+module.exports = withNextIntl(nextConfig);
+```
+
+`next-intl`はリクエストごとに設定を作成します。ここでは、ユーザーのロケールに応じてメッセージやその他のオプションを提供できます。
+
+root ディレクトリに`i18n.ts`ファイルを作成しましょう。ここでサーバーとクライアントの言語設定を行います。
+
+```jsx
+import {notFound} from 'next/navigation';
+import {getRequestConfig} from 'next-intl/server';
+
+// 共有設定からインポートできます
+const locales = ['en', 'de'];
+
+export default getRequestConfig(async ({locale}) => {
+  // 受け取った`locale`パラメーターが有効かどうかを検証
+  if (!locales.includes(locale as any)) notFound();
+
+  return {
+    messages: (await import(`../locales/${locale}.json`)).default
+  };
+});
+```
+
+次に、リクエストのロケールを処理し、適切にリダイレクトまたはリライトするミドルウェアを設定しましょう。
+
+root ディレクトリに`middleware.ts`を作成し、以下のコードを書きます:
+
+```jsx
+import createMiddleware from 'next-intl/middleware';
+
+export default createMiddleware({
+  // サポートするすべてのロケールの一覧
+  locales: ['en', 'de'],
+
+  // ロケールが一致しない場合に使用
+  defaultLocale: 'en'
+});
+
+export const config = {
+  // 国際化されたパスネームのみにマッチ
+  matcher: ['/', '/(de|en)/:path*']
+}
+```
+
+Next.jsのミドルウェアについて詳しくない場合は、[こちらのドキュメント](https://nextjs.org/docs/app/building-your-application/routing/middleware)をご覧ください。
+
+## ファイルベースのルーティング
+
+Next.jsはファイルベースのルーティングをサポートしています。`app`ディレクトリ内に`[locale]`ディレクトリを作成し、`layout.tsx`でHTMLの言語を動的に設定しましょう。
+
+既存の`layout.tsx`と`page.tsx`を`[locale]`ディレクトリに移動します。
+
+ディレクトリの構造は以下のようになります:
+
+```jsx
+app/[locale]/layout.tsx
+app/[locale]/page.tsx
+```
+
+Next.jsはファイルベースのルーティングをサポートしているので、現在のロケールをパラメーターから取得できます。`layout.tsx`を少し変更しましょう。
+
+```jsx
+export default function LocaleLayout({
+  children,
+  params: {locale}
+}: {
+  children: React.ReactNode;
+  params: {locale: string};
+}) {
+  return (
+    <html lang={locale}>
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+パラメーターからロケールを取得し、`<html lang={locale}`でブラウザにロケールを伝えます。
+
+同様に、`page.tsx`でもロケールを使用しましょう。
+
+```jsx
+import {useTranslations} from 'next-intl';
+
+export default function Index() {
+  const t = useTranslations('Index');
+  return <h1>{t('title')}</h1>;
+}
+```
+
+`next-intl`の設定が完了しました。次に、[Bilingual](https://bilingual.vuvusha.com)を設定して、自動的に文章を翻訳し、翻訳をプッシュ、取得する方法を説明します。
+
+[Bilingual](https://bilingual.vuvusha.com)に[サインアップ](https://bilingualapp.vuvusha.com/register)し、必要な文字数分のサブスクリプションを購入するか、無料トライアルを始めてください。
+
+トライアルに成功すると、プロジェクトページに移動します。ここで新しいプロジェクトを作成できます。
+
+![Untitled](/images/Untitled%201.png)
+
+プロジェクト名、翻訳モデル(トライアル中は Bilingual のみ使用可能)、翻訳元の言語、説明(オプション)を入力し、フォームを送信してください。
+
+![Untitled](/images/Untitled%202.png)
+
+プロジェクトページに移動したら、翻訳先の言語を追加したり、ベース言語をクリックして翻訳したい文章を追加できます。
+
+![Untitled](/images/Untitled%203.png)
+
+ここで翻訳言語を追加したり、ベース言語をクリックして翻訳したい文章を入力できます。また、Json、CSV、Excelからインポートすることもできます。インポート/エクスポートタブでサンプルをダウンロードし、編集してアップロードすると、一括で文章を追加できます。
+
+![Untitled](/images/Untitled%205.png)
+
+さらに、コマンドラインツールを使ってプロジェクトの既存のJSONをアップロードすることもできます。プロジェクトキーを作成する必要があります。プロジェクトページのAPI and Exportsタブで、名前と有効期限(空白の場合は無期限)を指定してAPIキーを生成してください。キーは他の人と共有しないでください。
+
+プロジェクトキーの作成が完了したら、コードに戻りましょう。
+
+## プロジェクトキーとロケールのベースディレクトリの設定
+
+前述のようにbilingual-tsのJavaScriptライブラリをインストールしました。次に、環境変数でプロジェクトキー、ロケールのベースディレクトリなどを設定します。
+
+root ディレクトリに `.env` ファイルを作成し、環境変数を追加します。
+
+```bash
+BILINGUAL_API_KEY=Your APi Key
+LOCALE_BASE_PATH="locales"
+LANGUAGE_CODE_MAP="en:en-us,jp:ja"
+```
+
+`LANGUAGE_CODE_MAP`キーについて説明します。
+
+Bilingualでサポートされている言語コードがローカルの言語コードと異なる場合があります。その場合、このマッピングを使って言語コードを対応づけることができます。
+
+例の `en:en-us` では、 `en` (左側)がローカルのディレクトリ名や言語コードを、 `en-us` がBilingualの言語コードを表しています。
+
+最後に、翻訳データを保存する `locales` ディレクトリを作成しましょう。
+
+Bilingualから翻訳された言語を取得するには、以下のコマンドを実行します。
+
+```bash
+npx get-translated
+```
+
+すると、localesフォルダ内にファイルが作成されます。
+
+![Untitled](/images/Untitled%206.png)
+
+新しいファイルをサーバーにプッシュするには、
+
+JSONファイルを変更したり、新しいページを作成して追加の翻訳を行った後、
+
+以下のコマンドを実行します。
+
+```bash
+npx push-locales
+```
+
+これで、新しく追加したJSONファイルがすべてサーバーにプッシュされます。
+
+数秒または数分後に、翻訳と検証のプロセスが完了します。
+
+再び `npx get-translated` を実行すると、翻訳された言語を取得できます。
+
+このように、単一のコマンドで簡単に翻訳の追加、更新、プッシュ、取得ができます。
+
+何か問題がある場合は、[https://bilingual.vuvusha.com](https://bilingual.vuvusha.com)にお問い合わせください。
