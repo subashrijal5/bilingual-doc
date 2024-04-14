@@ -38,9 +38,9 @@ import {
 /** @type {import('nextra-theme-docs').DocsThemeConfig} */
 const themeConfig = {
     project: {
-        link: "https://github.com/vercel/swr",
+        link: "https://github.com/subashrijal5/bilingual-doc",
     },
-    docsRepositoryBase: "https://github.com/vercel/swr-site/blob/main",
+    docsRepositoryBase: "https://github.com/subashrijal5/bilingual-doc",
     useNextSeoProps() {
         return {
             titleTemplate: "%s – Bilingual",
@@ -121,13 +121,13 @@ const themeConfig = {
 
             return (
                 <a
-                    href={`https://vercel.com/?utm_source=${utmSource}`}
+                    href={`https://bilingual.vuvusha.com`}
                     target="_blank"
                     rel="noopener"
                     className="inline-flex items-center no-underline text-current font-semibold"
                 >
                     <span className="mr-2">{text}</span>
-                    <span>dasdsd</span>
+                    <span>Bilingual</span>
                     {suffix ? <span className="ml-2">{suffix}</span> : null}
                 </a>
             );

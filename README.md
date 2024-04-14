@@ -1,6 +1,6 @@
 # Bilingual Docs
 
-This is a template for creating documentation with [Lang Lift](https://bilingual.bhudex.com).
+This is a template for creating documentation with [Bi-Lingual](https://bilingual.bhudex.com).
 
 ## Local Development
 
