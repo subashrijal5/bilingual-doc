@@ -2,6 +2,7 @@
   "index": "Introduction",
   "get-started": "Get Started",
   "subscription": "Subscription",
+  "api-and-export": "API and Export",
   "validate-translated-strings": "Validate Translated Strings",
   "bilingual-with-nextjs": "Integrate with Next.js",
   "about": {
